@@ -1,0 +1,233 @@
+{
+  "name": "Email Assitant",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Likeeta. How can I assist you today?",
+        "options": {}
+      },
+      "id": "51deebb5-c1b7-4420-9cbd-cca99140ff27",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "08501ecf-6944-44c1-bd1d-2f3fae70e46c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a professional email assistant. Rewrite the provided email draft into a polished, professional email without copying it verbatim. Preserve the original intent while improving clarity, tone, and structure. Always sign emails with:\n\nRegards,                                                                         \nLikeeta\n\nYou can send emails using the \"Send a message in Gmail\" tool.\n- After rewriting a draft, show the user the final email (subject and body).\n- If the user has not provided the recipient's email address, ask for it.\n- Only send after the user has given a recipient address and confirmed they want it sent (e.g. \"send it\", \"yes\"). If the user explicitly asks you to send to a specific address in their message, you may send directly.\n- When sending, pass the recipient address as To, a concise subject line as Subject, and the full polished email as Message.\n- After sending, confirm to the user that the email was sent and to whom.\n\nWhen the user wants to answer an email they received, use \"Get many messages in Gmail\" to find it (search like from:name@example.com), show the drafted reply, and after they confirm, send it with \"Reply to a message in Gmail\" using that message's ID. Use \"Send a message in Gmail\" only for new emails.\nSign only the emails you send (not your chat replies) with: Regards, Likeeta"
+        }
+      },
+      "id": "5c087110-ac66-4b1e-b0a6-fcdca63eb4d4",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "8e92cd1a-f8a5-4169-847b-5a569b282e79",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        208
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "id": "1604406c-8ca3-40d3-bba1-95c019f0e600",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `Recipient email address`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `Email subject line`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `Full polished email body including sign-off`, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "50352c7b-a999-4bed-8ebe-93dfd30af6cf",
+      "name": "Send a message in Gmail",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        256
+      ],
+      "webhookId": "a1f0e4fe-49f1-44a9-bb4d-636946a53664",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W4ASZwmWPfkJcVAF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "simple": false,
+        "filters": {
+          "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        256
+      ],
+      "id": "79088045-2685-4ec1-9fa1-b0ef2cf66ded",
+      "name": "Get many messages in Gmail",
+      "webhookId": "5c7fcbfe-c00f-411e-82ce-bb7bf5a7988c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W4ASZwmWPfkJcVAF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        144
+      ],
+      "id": "4ed47c4f-c891-4c1a-a4d4-9ef7653d7174",
+      "name": "Reply to a message in Gmail",
+      "webhookId": "4fb379ac-bc9a-452c-9b04-96ae7b3bd453",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "W4ASZwmWPfkJcVAF",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d6574284-e97e-4c0c-a340-401023253907",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2f76225f1ae976cb482875a1f50b2a765db2d1009fd575135f6a9fa991210389"
+  },
+  "nodeGroups": [],
+  "id": "ap9eF1uVL6ZVZdW8",
+  "tags": []
+}
